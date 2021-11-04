@@ -28,7 +28,6 @@ prog
   .describe('Create or update a name record for the given key ID to point to the given CID.')
   .action(async (key, cid, privKey) => {
     const record = await lib.createRecord(key, cid, privKey)
-    await lib.publish(key, record)
     console.log(record)
   })
 
