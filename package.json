@@ -1,0 +1,22 @@
+{
+  "name": "w3name",
+  "version": "0.0.0",
+  "description": "IPNS for Web3.Storage",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "w3name": "bin.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alan Shaw",
+  "license": "MIT",
+  "dependencies": {
+    "ipns": "^0.15.0",
+    "libp2p-crypto": "^0.19.7",
+    "peer-id": "^0.15.3",
+    "sade": "^1.7.4",
+    "uint8arrays": "^3.0.0"
+  }
+}
