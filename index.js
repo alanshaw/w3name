@@ -5,40 +5,10 @@ import * as Digest from 'multiformats/hashes/digest'
 import { identity } from 'multiformats/hashes/identity'
 import { base36 } from 'multiformats/bases/base36'
 import { CID } from 'multiformats/cid'
-// import { getPrivKey } from './ipfs-config.js'
 import { keys } from 'libp2p-crypto'
 import * as db from './db.js'
 
 const libp2pKeyCode = 0x72
-// const cid = 'bafkreiem4twkqzsq2aj4shbycd4yvoj2cx72vezicletlhi7dijjciqpui'
-
-// async function test () {
-//   const privKey = await getPrivKey()
-
-//   const value = uint8arrays.fromString(cid)
-//   const lifetime = 0 // forever?
-
-//   let record = null // possibly previous record
-
-//   // Determine the record sequence number
-//   let seqNumber = 0n
-//   if (record && record.sequence !== undefined) {
-//     seqNumber = uint8arrays.equals(record.value, value) ? record.sequence : record.sequence + 1n
-//   }
-
-//   record = await ipns.create(privKey, value, seqNumber, lifetime)
-
-//   // Marshal record
-//   // const serialized = ipns.marshal(record) // I don't think we need this
-
-//   const digest = createDigest(identity.code, privKey.public.bytes)
-//   // const digest = createDigest(identity.code, peerId.pubKey.bytes)
-//   const key = ipns.getLocalKey(digest.bytes)
-//   // const key = ipns.getLocalKey(peerId.id)
-//   console.log(key.toString())
-//   console.log(await privKey.id())
-//   console.log(CID.createV1(libp2pKeyCode, digest).toString(base36))
-// }
 
 /**
  * @param {string} rawKey "libp2p-key" encoding of the public key.
