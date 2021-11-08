@@ -22,7 +22,7 @@ Users "resolve" a Key ID to the current _value_ of a _record_. Typically a CID. 
 **Publish** a name record for the given key ID. The updated record is signed with the private key and sent in the request body. The server validates the record and ensures the sequence number is greater than the sequence number of any cached record.
 
 <details>
-  <summary>Additional routes</summary>
+  <summary>Optional routes</summary>
 
   Additional routes _may_ be made available to allow trusted creation of public/private keys and trusted create/update of records:
 
