@@ -11,9 +11,9 @@ prog
   .describe('Resolve the current CID for the given key ID.')
   .example('resolve k51qzi5uqu5dkgx70pep14x7b219nbb56zlrri5iglvetd7d4pqfvuvdetx8ts')
   .action(async key => {
-    const cid = await lib.resolve(key)
-    if (!cid) return console.error('not found')
-    console.log(cid.toString())
+    const result = await lib.resolve(key)
+    if (!result) return console.error('not found')
+    console.log(JSON.stringify(result, null, 2))
   })
 
 prog
@@ -28,7 +28,7 @@ prog
   .describe('Create or update a name record for the given key ID to point to the given CID.')
   .action(async (key, cid, privKey) => {
     const record = await lib.createRecord(key, cid, privKey)
-    console.log(record)
+    console.log(JSON.stringify({ record }, null, 2))
   })
 
 prog

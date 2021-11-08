@@ -61,7 +61,10 @@ export async function resolve (rawKey) {
 
   // TODO: ensure not expired?
 
-  return CID.decode(record.value)
+  return {
+    value: CID.decode(record.value).toString(),
+    record: uint8arrays.toString(rawRecord, 'base64pad')
+  }
 }
 
 export async function createKeypair () {

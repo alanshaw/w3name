@@ -6,7 +6,7 @@ Simple mutability for Web3.Storage.
 
 Users create a keypair<sup>*</sup> and derive a **Key ID** from the public key that acts as the "name".
 
-The Key ID is the base36 "libp2p-key" encoding of the public key. The public key is a protobuf encoded and contains a type and the DER encoding of the PKCS SubjectPublicKeyInfo.
+The Key ID is the base36 "libp2p-key" encoding of the public key. The public key is protobuf encoded and contains `Type` and `Data` properties, see [`ed25519-class.js` for example](https://github.com/libp2p/js-libp2p-crypto/blob/c29c1490bbd25722437fdb36f2f0d1a705f35909/src/keys/ed25519-class.js#L25-L30).
 
 Users "resolve" a Key ID to the current _value_ of a _record_. Typically a CID. Keypair owners "publish" name _records_ to create or update the current _value_.
 
