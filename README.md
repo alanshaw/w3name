@@ -4,14 +4,16 @@ Simple mutability for Web3.Storage.
 
 ## HTTP API
 
-Users create a Ed25519 2048 bit keypair and derive a **Key ID** from the public key that acts as the "name".
+Users create a keypair<sup>*</sup> and derive a **Key ID** from the public key that acts as the "name".
 
-The Key ID is the base36 "libp2p-key" encoding of the public key. The public key is a protobuf encoding containing a type and the DER encoding of the PKCS SubjectPublicKeyInfo.
+The Key ID is the base36 "libp2p-key" encoding of the public key. The public key is a protobuf encoded and contains a type and the DER encoding of the PKCS SubjectPublicKeyInfo.
+
+Users "resolve" a Key ID to the current _value_ of a _record_. Typically a CID. Keypair owners "publish" name _records_ to create or update the current _value_.
 
 * `GET /name/:key`
-    Resolve the current CID for the given key ID.
+    **Resolve** the current CID for the given key ID. It returns the resolved value AND the full name record (for client side verification).
 * 🔒 `POST /name/:key`
-    Replace a name record for the given key ID. The updated record is signed with the private key and sent in the request body. The server validates the record and ensures it's sequence number is greater than the sequence number of any cached record.
+    **Publish** a name record for the given key ID. The updated record is signed with the private key and sent in the request body. The server validates the record and ensures the sequence number is greater than the sequence number of any cached record.
 
 Additional routes _may_ be made available to allow trusted creation of public/private keys and trusted create/update of records:
 
@@ -22,7 +24,9 @@ Additional routes _may_ be made available to allow trusted creation of public/pr
 
 Note: 🔒 denotes an authenticated route. These actually do not _need_ to be authenticated since users manage their own public/private keys but it'll allow us to block abuse and we may want to log/record information about which users are publishing updates in the future.
 
-## Information
+<sup>*</sup> Currently a Ed25519 2048 bit (min) key.
+
+## More Information
 
 This is a protocol for IPNS over HTTP. This is backed by IPNS records, in the future we _could_ publish these to the DHT for resolution via IPFS and we _could_ listen for updates from users publishing records to the DHT.
 
