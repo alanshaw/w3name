@@ -52,3 +52,21 @@ CREATE TABLE public.name (
 ## Websockets (future awesomeness)
 
 In a future iteration we can use WebSockets and Cloudflare "Durable Objects" to allow users to "listen" to updates for a given key.
+
+## Demo
+
+This repo contains a CLI application, PoC code that can be easily adapted for an implementation in Web3.Storage.
+
+```sh
+npm i
+npm link
+```
+
+1. `w3name create-keypair`
+    Create a keypair and derive the "Key ID" from the public key. Alternatively use your local IPFS node. The "Key ID" can be found using `ipfs key list -l` and your private key can be found in `~/.ipfs/config` under `Identity.PrivKey`.
+2. `w3name create-record <key> <cid> <privateKey>`
+    Create a base64 encoded IPNS record. If an existing record is found, the new record will have the sequence number incremented. `key` is the "Key ID", `cid` is the CID to associate with the key and `privateKey` is used to create (sign) the record.
+3. `w3name publish <key> <record>`
+    Publish a name record. It _validates_ the record based on the public key found in the "Key ID". For the CLI demo this just saves the record to a `data.json` file under the given key. In production we'll also ensure the sequence number is greater than the sequence number of any existing record we have.
+4. `w3name resolve <key>`
+    Resolve the passed key to the current value. It returns the resolved value _and_ the record so that the signing information can be verified.
