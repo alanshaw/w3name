@@ -28,9 +28,11 @@ Note: 🔒 denotes an authenticated route. These actually do not _need_ to be au
 
 ## More Information
 
-This is a protocol for IPNS over HTTP. This is backed by IPNS records, in the future we _could_ publish these to the DHT for resolution via IPFS and we _could_ listen for updates from users publishing records to the DHT.
+This is a protocol for IPNS over HTTP. It is backed by IPNS records. In the future we _could_ publish these to the DHT for resolution via IPFS and we _could_ listen for updates from users publishing records to the DHT.
 
-Since IPNS distribution and resolution is not yet performant, resolving records via the HTTP API will _not_ use the DHT and will return the "current" cached record for a given key. Likewise, publishing a record via the HTTP API will _not_ cause it to be published to the IPFS DHT i.e. records _must_ be created/updated via the HTTP API for up to date resolution via the HTTP API.
+Caveats apply: Since IPNS distribution and resolution using the IPFS DHT is not yet performant, resolving records via the HTTP API will _not_ use the DHT and will return the "current" cached record (in Web3.Storage) for a given key. Likewise, publishing a record via the HTTP API will _not_ cause it to be published to the IPFS DHT i.e. records _must_ be created/updated via the HTTP API for up to date resolution via the HTTP API.
+
+The important thing is that the name records in use here do not lock a user into dotStorage, they are just IPNS records that are byte for byte compatible with the IPNS records you'd publish via IPFS. They're also generated with the default IPFS keypair configuration and we use the same "Key ID" to address them. You can even use your IPFS private key from `~/.ipfs/config`. If we ever connect Web3.Storage to the IPNS publishing/distribution used in IPFS then you'd be able to publish name record updates via the Web3.Storage API or `ipfs name publish ...`.
 
 ## DB Schema
 
@@ -46,3 +48,7 @@ CREATE TABLE public.name (
     updated_at  TIMESTAMP NOT NULL
 )
 ```
+
+## Websockets (future awesomeness)
+
+In a future iteration we can use WebSockets and Cloudflare "Durable Objects" to allow users to "listen" to updates for a given key.
