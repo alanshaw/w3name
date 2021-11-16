@@ -24,10 +24,10 @@ prog
   })
 
 prog
-  .command('create-record <key> <cid> <privateKey>')
-  .describe('Create or update a name record for the given key ID to point to the given CID.')
-  .action(async (key, cid, privKey) => {
-    const record = await lib.createRecord(key, cid, privKey)
+  .command('create-record <privateKey> <key> <value>')
+  .describe('Create or update a name record for the given key ID to point to the given CID or IPFS path.')
+  .action(async (privKey, key, value) => {
+    const record = await lib.createRecord(privKey, key, value)
     console.log(JSON.stringify({ record }, null, 2))
   })
 

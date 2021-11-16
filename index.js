@@ -11,60 +11,52 @@ import * as db from './db.js'
 const libp2pKeyCode = 0x72
 
 /**
- * @param {string} rawKey "libp2p-key" encoding of the public key.
- * @param {string} rawRecord base64 encoded buffer of IPNS record to publish.
+ * @param {string} key "libp2p-key" encoding of the public key.
+ * @param {string} record base64 encoded buffer of IPNS record to publish.
  */
-export async function publish (rawKey, rawRecord) {
-  const key = CID.parse(rawKey, base36)
-  if (key.code !== libp2pKeyCode) {
-    throw new Error(`invalid key code: ${key.code}`)
+export async function publish (key, record) {
+  const keyCid = CID.parse(key, base36)
+  if (keyCid.code !== libp2pKeyCode) {
+    throw new Error(`invalid key code: ${keyCid.code}`)
   }
 
-  const record = ipns.unmarshal(uint8arrays.fromString(rawRecord, 'base64pad'))
-  const pubKey = keys.unmarshalPublicKey(Digest.decode(key.multihash.bytes).bytes)
+  const entry = ipns.unmarshal(uint8arrays.fromString(record, 'base64pad'))
+  const pubKey = keys.unmarshalPublicKey(Digest.decode(keyCid.multihash.bytes).bytes)
 
-  if (record.pubKey && !keys.unmarshalPublicKey(record.pubKey).equals(pubKey)) {
+  if (entry.pubKey && !keys.unmarshalPublicKey(entry.pubKey).equals(pubKey)) {
     throw new Error('embedded public key mismatch')
   }
 
-  await ipns.validate(pubKey, record)
+  await ipns.validate(pubKey, entry)
 
   // Update the DB, ensuring the seqno in the update is greater than the current
-  const existingRawRecord = await getRecord()
-  const existingRecord = existingRawRecord ? ipns.unmarshal(rawRecord) : null
+  const existingRecord = await db.get(key)
+  const existingEntry = existingRecord ? ipns.unmarshal(uint8arrays.fromString(existingRecord, 'base64pad')) : null
 
-  if (existingRecord && existingRecord.seqNumber <= record.seqNumber) {
+  if (existingEntry && existingEntry.seqNumber <= entry.seqNumber) {
     throw new Error('invalid sequence number')
   }
 
-  await db.put(rawKey, rawRecord)
-}
-
-async function getRecord (key) {
-  const value = await db.get(key)
-  return value ? uint8arrays.fromString(value, 'base64pad') : undefined
+  await db.put(key, record)
 }
 
 /**
- * @param {string} rawKey "libp2p-key" encoding of the public key.
+ * @param {string} key "libp2p-key" encoding of the public key.
  */
-export async function resolve (rawKey) {
-  const key = CID.parse(rawKey, base36)
-  if (key.code !== libp2pKeyCode) {
-    throw new Error(`invalid key code: ${key.code}`)
+export async function resolve (key) {
+  const { code } = CID.parse(key, base36)
+  if (code !== libp2pKeyCode) {
+    throw new Error(`invalid key code: ${code}`)
   }
 
-  const rawRecord = await getRecord(rawKey)
-  if (!rawRecord) return // not has
+  const record = await db.get(key)
+  if (!record) return // not has
 
-  const record = ipns.unmarshal(rawRecord)
+  const entry = ipns.unmarshal(uint8arrays.fromString(record, 'base64pad'))
 
   // TODO: ensure not expired?
 
-  return {
-    value: CID.decode(record.value).toString(),
-    record: uint8arrays.toString(rawRecord, 'base64pad')
-  }
+  return { value: uint8arrays.toString(entry.value), record }
 }
 
 export async function createKeypair () {
@@ -78,34 +70,31 @@ export async function createKeypair () {
 }
 
 /**
- * @param {string} rawKey
- * @param {string} rawCid
- * @param {string} rawPrivKey base64 encoded private key
+ * @param {string} privKey base64 encoded private key
+ * @param {string} key "libp2p-key" encoding of the public key.
+ * @param {string} value IPFS path
  */
-export async function createRecord (rawKey, rawCid, rawPrivKey) {
-  const key = CID.parse(rawKey, base36)
-  if (key.code !== libp2pKeyCode) {
-    throw new Error(`invalid key code: ${key.code}`)
+export async function createRecord (privKey, key, value) {
+  const { code } = CID.parse(key, base36)
+  if (code !== libp2pKeyCode) {
+    throw new Error(`invalid key code: ${code}`)
   }
 
-  const privKeyBytes = uint8arrays.fromString(rawPrivKey, 'base64pad')
-  const privKey = await keys.unmarshalPrivateKey(privKeyBytes)
-
-  const cid = CID.parse(rawCid)
-  const value = cid.bytes
+  const privKeyBytes = uint8arrays.fromString(privKey, 'base64pad')
+  const privKeyObj = await keys.unmarshalPrivateKey(privKeyBytes)
   const lifetime = 1000 * 60 * 60 // TODO: how long?
 
-  const rawRecord = await getRecord(rawKey)
-  let record = rawRecord ? ipns.unmarshal(rawRecord) : null
+  const record = await db.get(key)
+  let entry = record ? ipns.unmarshal(uint8arrays.fromString(record, 'base64pad')) : null
 
   // Determine the record sequence number
   let seqNumber = 0n
-  if (record && record.sequence !== undefined) {
-    seqNumber = uint8arrays.equals(record.value, value) ? record.sequence : record.sequence + 1n
+  if (entry && entry.sequence !== undefined) {
+    seqNumber = uint8arrays.equals(entry.value, value) ? entry.sequence : entry.sequence + 1n
   }
 
-  record = await ipns.create(privKey, value, seqNumber, lifetime)
-  return uint8arrays.toString(ipns.marshal(record), 'base64pad')
+  entry = await ipns.create(privKeyObj, uint8arrays.fromString(value), seqNumber, lifetime)
+  return uint8arrays.toString(ipns.marshal(entry), 'base64pad')
 }
 
 // main()
